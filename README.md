@@ -22,7 +22,7 @@ The installer I used should be in the gdrive link of the Temp repo.
   - Click `Configure` again to validate. 
   - Click `Generate`.
   - Click `Open Project`. 
-  - Change the target to Release [Here](https://raw.githubusercontent.com/Doug1983/Temp/master/release.jpg?token=ACHI3LCBGRYFLE3C2YRMVRK5JG2C2)
+  - Change the target to Release ![Here](https://raw.githubusercontent.com/Doug1983/Temp/master/release.jpg?token=ACHI3LCBGRYFLE3C2YRMVRK5JG2C2)
   - Right click on `INSTALL` in the solution explorer and click build. 
   - Once done, close everything. 
  - Copy the contents of the `../build/Release/` folder into the `../MonkeyLogic/task/ML_UnityVR_Task/libLSL/bin/` folder. 
