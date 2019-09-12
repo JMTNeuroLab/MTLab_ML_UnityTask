@@ -34,10 +34,13 @@ classdef lslTracker < mltracker
         %   21: Unity LSL Time
         % To this we add: 
         %   22: Time Correction between the two LSL clocks
-        %   23: Sample TimeStamp
-        %   24: Local LSL TimeStamp
-        %   25: MonkeyLogic Trial Time.
-        Frame_Data = NaN(25, 120 * 100); % 120 sec @ 100Hz
+        %   23: Local LSL TimeStamp
+        %   24: 
+            temp_struct.ML_Local_Time = lsl_local_clock(obj.Lib);
+            temp_struct.ML_Trial_Time = trialtime;
+        
+
+        Frame_Data = struct()
         Trial_Data = struct()
     end
     
@@ -71,13 +74,12 @@ classdef lslTracker < mltracker
                 % stamps are on the sender clock time
                 [sample, timestamp] = obj.Frame_Inlet.pull_sample(0);
                 if ~isempty(sample)
-                    temp_array = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
-%                     if isempty(fieldnames(obj.Frame_Data))
-%                         obj.Frame_Data = temp_array;
-%                     else
-%                         obj.Frame_Data(obj.Counter) = temp_array;
-%                     end
-                    obj.Frame_Data(:, obj.Counter) = temp_array;
+                    temp_struct = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
+                    if isempty(fieldnames(obj.Frame_Data))
+                        obj.Frame_Data = temp_struct;
+                    else
+                        obj.Frame_Data(obj.Counter) = temp_struct;
+                    end
                     obj.Counter = obj.Counter + 1;
 
                     % make sure we have all the available samples
@@ -88,9 +90,9 @@ classdef lslTracker < mltracker
                             has_buffer = false;
                             continue
                         end
-                        temp_array = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
-                        obj.Frame_Data(:, obj.Counter) = temp_array;
-                    obj.Counter = obj.Counter + 1;
+                        temp_struct = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
+                        obj.Frame_Data(obj.Counter) = temp_struct;
+                        obj.Counter = obj.Counter + 1;
                     end
                     obj.Success = true;
                 else
@@ -99,19 +101,13 @@ classdef lslTracker < mltracker
             end
         end
         
-        function temp_array = ProcessSample(obj, sample, timestamp, trialtime)
+        function temp_struct = ProcessSample(obj, sample, timestamp, trialtime)
             Time_Corr = obj.Frame_Inlet.time_correction();
-%             temp_struct = jsondecode(sample);
-            temp_array = [sample;
-                Time_Corr;
-                timestamp;
-                lsl_local_clock(obj.Lib);
-                trialtime];
-
-%             temp_struct.Time_Corr = Time_Corr;
-%             temp_struct.ML_Sample_Time = timestamp;
-%             temp_struct.ML_Local_Time = lsl_local_clock(obj.Lib);
-%             temp_struct.ML_Trial_Time = trialtime;
+            temp_struct = jsondecode(sample);
+            temp_struct.Time_Corr = Time_Corr;
+            temp_struct.ML_Sample_Time = timestamp;
+            temp_struct.ML_Local_Time = lsl_local_clock(obj.Lib);
+            temp_struct.ML_Trial_Time = trialtime;
         end
         
         function temp_struct = ProcessTrial(obj, sample, timestamp, trialtime)
@@ -125,7 +121,7 @@ classdef lslTracker < mltracker
         
         function sample = GetLastSample(obj)
             if obj.Counter > 1
-                sample = obj.Frame_Data(:,obj.Counter-1);
+                sample = obj.Frame_Data(obj.Counter-1);
             else
                 sample = [];
             end
@@ -133,8 +129,7 @@ classdef lslTracker < mltracker
         
         function sample = GetLastState(obj)
             if obj.Counter > 1
-%                 sample = obj.Frame_Data(obj.Counter-1).Trial_State;
-                sample = obj.Frame_Data(7, obj.Counter-1);
+                sample = obj.Frame_Data(obj.Counter-1).Trial_State;
             else
                 sample = [];
             end
@@ -152,8 +147,7 @@ classdef lslTracker < mltracker
             % get remaining frame samples in lsl stream
             obj.acquire(p)
             
-            % remove nan columns
-            frame_data = obj.Frame_Data(:, sum(isnan(obj.Frame_Data),1)==0);
+            frame_data = obj.Frame_Data;
             trial_data = obj.Trial_Data;
         end
     end
