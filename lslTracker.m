@@ -71,7 +71,7 @@ classdef lslTracker < mltracker
                 % stamps are on the sender clock time
                 [sample, timestamp] = obj.Frame_Inlet.pull_sample(0);
                 if ~isempty(sample)
-                    temp_array = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
+                    temp_array = obj.ProcessSample(sample, timestamp, p.trialtime());
 %                     if isempty(fieldnames(obj.Frame_Data))
 %                         obj.Frame_Data = temp_array;
 %                     else
@@ -88,7 +88,7 @@ classdef lslTracker < mltracker
                             has_buffer = false;
                             continue
                         end
-                        temp_array = obj.ProcessSample(sample{1}, timestamp, p.trialtime());
+                        temp_array = obj.ProcessSample(sample, timestamp, p.trialtime());
                         obj.Frame_Data(:, obj.Counter) = temp_array;
                     obj.Counter = obj.Counter + 1;
                     end
@@ -102,7 +102,7 @@ classdef lslTracker < mltracker
         function temp_array = ProcessSample(obj, sample, timestamp, trialtime)
             Time_Corr = obj.Frame_Inlet.time_correction();
 %             temp_struct = jsondecode(sample);
-            temp_array = [sample;
+            temp_array = [sample'; % is a (1,21) then -> (21,1)
                 Time_Corr;
                 timestamp;
                 lsl_local_clock(obj.Lib);
@@ -148,13 +148,14 @@ classdef lslTracker < mltracker
             end
         end
         
-        function [frame_data, trial_data] = GetTrialData(obj, p)
+        function [frame_data, trial_data, xml_data] = GetTrialData(obj, p)
             % get remaining frame samples in lsl stream
             obj.acquire(p)
             
             % remove nan columns
             frame_data = obj.Frame_Data(:, sum(isnan(obj.Frame_Data),1)==0);
             trial_data = obj.Trial_Data;
+            xml_data = obj.Trial_Inlet.info().as_xml();
         end
     end
     

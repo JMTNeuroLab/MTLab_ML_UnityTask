@@ -57,6 +57,7 @@ unity.CorrectOutcomes = correct_outcomes;
 unity.IncorrectOutcomes = incorrect_outcomes;  
 
 scene1 = create_scene(unity); 
+
 run_scene(scene1,10);
 
 if ~unity.Success          % The failure of MultiTarget means that none of the targets was chosen.
@@ -75,6 +76,7 @@ end
 
 % Get trial data and save 
 
-[data, trial] = Unity_.GetTrialData(param_);
+[data, trial, xml] = Unity_.GetTrialData(param_);
 bhv_variable('VR_Data', data)  % To Save variables to file. 
 bhv_variable('VR_Trial', trial)
+bhv_variable('XML_Header', xml)
