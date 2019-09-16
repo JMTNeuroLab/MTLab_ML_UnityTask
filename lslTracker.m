@@ -16,7 +16,7 @@ classdef lslTracker < mltracker
     properties (SetAccess = protected)
         Counter = 1  % position within the pre-allocated memory arrays
 
-        % current frame data has 21 x sample data where each sample is: 
+        % current frame data has 22 x sample data where each sample is: 
         %   1: Position X
         %   2: Position Y
         %   3: Position Z
@@ -31,13 +31,14 @@ classdef lslTracker < mltracker
         %   15-19: Gaze Targets Number of rays | 5x
         %                              _|
         %   20: Trial State
-        %   21: Unity LSL Time
+        %   21: PhotoDiodeIntensity
+        %   22: Unity LSL Time
         % To this we add: 
-        %   22: Time Correction between the two LSL clocks
-        %   23: Sample TimeStamp
-        %   24: Local LSL TimeStamp
-        %   25: MonkeyLogic Trial Time.
-        Frame_Data = NaN(25, 120 * 100); % 120 sec @ 100Hz
+        %   23: Time Correction between the two LSL clocks
+        %   24: Sample TimeStamp
+        %   25: Local LSL TimeStamp
+        %   26: MonkeyLogic Trial Time.
+        Frame_Data = NaN(26, 120 * 100); % 120 sec @ 100Hz
         Trial_Data = struct()
     end
     
