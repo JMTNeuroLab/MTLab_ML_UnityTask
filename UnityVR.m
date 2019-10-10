@@ -80,3 +80,19 @@ end
 bhv_variable('VR_Data', data)  % To Save variables to file. 
 bhv_variable('VR_Trial', trial)
 bhv_variable('XML_Header', xml)
+
+% Since MonkeyLogic only saves the calibrated eye data in degrees, we need
+% to keep the calibration and pixels per degree values. 
+eye_cal = struct();
+eye_cal.el_gains = MLConfig.EyeTracker.EyeLink.Source(1:2,4)';        %[gain_x, gain_y]
+eye_cal.el_offsets = MLConfig.EyeTracker.EyeLink.Source(1:2,3)';      %[offset_x, offset_y]
+eye_cal.t_offset = MLConfig.EyeTransform{1,1}.offset;
+eye_cal.t_rotation = MLConfig.EyeTransform{1,2};                      % [2,2]
+if isempty(eye_cal.t_rotation)
+    eye_cal.t_rotation = eye(2);
+end
+eye_cal.t_transform = MLConfig.EyeTransform{1,3}.tdata.T;
+eye_cal.pix_per_deg = MLConfig.PixelsPerDegree(1);
+eye_cal.ml_x_res = MLConfig.Screen.Xsize;
+eye_cal.ml_y_res = MLConfig.Screen.Ysize;
+bhv_variable('Eye_Calibration', eye_cal);

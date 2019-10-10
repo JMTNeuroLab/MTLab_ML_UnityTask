@@ -20,7 +20,7 @@ cap.append_child_value('labelscheme','10-20');
 outlet = lsl_outlet(info);
 
 
-% === the following could run on another computer ===
+%% === the following could run on another computer ===
 
 % resolve the stream and open an inlet
 lib = lsl_loadlib();

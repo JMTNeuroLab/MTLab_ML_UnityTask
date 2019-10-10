@@ -77,8 +77,6 @@ switch hook
         eyecal_JSON = jsonencode(eyecal_JSON);
 %         display(eyecal_JSON)
         TrialRecord.User.control_outlet.push_sample({eyecal_JSON});  % push cell array
-        
-        
         TrialRecord.User.control_outlet.push_sample(ReturnLSLMessage(TrialRecord.User.control_markers{1}));
         
     case 'block_start'
@@ -110,6 +108,9 @@ switch hook
 %             TrialRecord.User.params_inlet.delete();
 %             TrialRecord.User.params_inlet = [];
         end
+        
+        
+        
     case 'task_aborted'  % in case that the task stops with an error. The 'task_end' hook will follow.
 
     case 'task_paused'   % when the task is paused with ESC during the task

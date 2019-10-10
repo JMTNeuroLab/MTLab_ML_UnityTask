@@ -69,10 +69,12 @@ classdef lslTracker < mltracker
             % Frame Data acquisition for tracker execution
             if ~isempty(obj.Frame_Inlet)
                 % ~ .036 ms to acquire. 
-                % stamps are on the sender clock time
+                % stamps are on the remote (sender) clock time
+                % To get proper time: 
+                %   Local clock + time correction = remote clock;
                 [sample, timestamp] = obj.Frame_Inlet.pull_sample(0);
                 if ~isempty(sample)
-                    temp_array = obj.ProcessSample(sample, timestamp, p.trialtime());
+                    temp_array = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime());
 %                     if isempty(fieldnames(obj.Frame_Data))
 %                         obj.Frame_Data = temp_array;
 %                     else
@@ -89,7 +91,7 @@ classdef lslTracker < mltracker
                             has_buffer = false;
                             continue
                         end
-                        temp_array = obj.ProcessSample(sample, timestamp, p.trialtime());
+                        temp_array = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime());
                         obj.Frame_Data(:, obj.Counter) = temp_array;
                     obj.Counter = obj.Counter + 1;
                     end
@@ -100,13 +102,13 @@ classdef lslTracker < mltracker
             end
         end
         
-        function temp_array = ProcessSample(obj, sample, timestamp, trialtime)
+        function temp_array = ProcessSample(obj, sample, timestamp, lsl_clock, trialtime)
             Time_Corr = obj.Frame_Inlet.time_correction();
 %             temp_struct = jsondecode(sample);
-            temp_array = [sample'; % is a (1,21) then -> (21,1)
+            temp_array = [sample'; % is a (1,22) then -> (22,1)
                 Time_Corr;
                 timestamp;
-                lsl_local_clock(obj.Lib);
+                lsl_clock;
                 trialtime];
 
 %             temp_struct.Time_Corr = Time_Corr;
