@@ -1,5 +1,4 @@
-
+*.asv
 *.bhv2
 *.h5
-*.mat
 *.mat
