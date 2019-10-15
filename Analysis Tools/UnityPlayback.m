@@ -132,19 +132,15 @@ uibutton(fig,'Position', [5 50 140 25], 'Text', 'GO', ...
         %  15:19 Gaze ray hit counts (max 33: 1 center and 4x8 circles)
         %  20: Trial State
         %  21: Photo Diode intensity
-        %  22: Unity LSL local time
-        %  23 Time Correction between the two LSL clocks
-        %  24: Sample TimeStamp
-        %  25: Local LSL TimeStamp
-        %  26: MonkeyLogic Trial Time
+        %  22: Unity LSL local time before sample is pushed
+        %  23 Time Correction between the two LSL clocks 
+        %           Local LSL Clock + Time Correction = Remote LSL Clock
+        %           ML LSL Clock + Time Correction = Unity LSL Clock
+        %  24: Timestamp at which sample is pushed in Unity LSL Time
+        %  25: Local MonkeyLogic LSL TimeStamp
+        %  26: MonkeyLogic Trial Time in ms
         % We only need : 1,2,3,4,8,9,20
         data=rawData([1,2,3,4,8,9,20], :);
-        
-        % convert eye data (8,9) to pixels
-        % Unity (0,0) is bottom left
-        % This ASSUMES THAT UNITY HAS THE SAME RESOLUTION AS ML
-        % data(5) = (data(5) * eyecal.pix_per_deg) + 0.5 * eyecal.ml_x_res;
-        % data(6) = (data(6) * eyecal.pix_per_deg) + 0.5 * eyecal.ml_y_res;
         
     end
 

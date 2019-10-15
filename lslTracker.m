@@ -26,10 +26,10 @@ classdef lslTracker < mltracker
         %   7: Player State (Collider ID)        
         %   8: Gaze Position X
         %   9: Gaze Position Y
-        %                              _
+        %                                     _
         %   10-14: Gaze Targets ID             |
         %   15-19: Gaze Targets Number of rays | 5x
-        %                              _|
+        %                                     _|
         %   20: Trial State
         %   21: PhotoDiodeIntensity
         %   22: Unity LSL Time
@@ -75,11 +75,6 @@ classdef lslTracker < mltracker
                 [sample, timestamp] = obj.Frame_Inlet.pull_sample(0);
                 if ~isempty(sample)
                     temp_array = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime());
-%                     if isempty(fieldnames(obj.Frame_Data))
-%                         obj.Frame_Data = temp_array;
-%                     else
-%                         obj.Frame_Data(obj.Counter) = temp_array;
-%                     end
                     obj.Frame_Data(:, obj.Counter) = temp_array;
                     obj.Counter = obj.Counter + 1;
 
@@ -104,17 +99,11 @@ classdef lslTracker < mltracker
         
         function temp_array = ProcessSample(obj, sample, timestamp, lsl_clock, trialtime)
             Time_Corr = obj.Frame_Inlet.time_correction();
-%             temp_struct = jsondecode(sample);
             temp_array = [sample'; % is a (1,22) then -> (22,1)
                 Time_Corr;
                 timestamp;
                 lsl_clock;
                 trialtime];
-
-%             temp_struct.Time_Corr = Time_Corr;
-%             temp_struct.ML_Sample_Time = timestamp;
-%             temp_struct.ML_Local_Time = lsl_local_clock(obj.Lib);
-%             temp_struct.ML_Trial_Time = trialtime;
         end
         
         function temp_struct = ProcessTrial(obj, sample, timestamp, trialtime)
@@ -136,7 +125,6 @@ classdef lslTracker < mltracker
         
         function sample = GetLastState(obj)
             if obj.Counter > 1
-%                 sample = obj.Frame_Data(obj.Counter-1).Trial_State;
                 sample = obj.Frame_Data(7, obj.Counter-1);
             else
                 sample = [];

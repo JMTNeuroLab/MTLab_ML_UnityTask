@@ -103,13 +103,7 @@ switch hook
             TrialRecord.User.frame_inlet.close_stream();
             TrialRecord.User.frame_inlet.delete();
             TrialRecord.User.frame_inlet = [];
-        
-%             TrialRecord.User.params_inlet.close_stream();
-%             TrialRecord.User.params_inlet.delete();
-%             TrialRecord.User.params_inlet = [];
         end
-        
-        
         
     case 'task_aborted'  % in case that the task stops with an error. The 'task_end' hook will follow.
 
