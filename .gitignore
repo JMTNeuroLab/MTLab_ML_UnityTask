@@ -2,3 +2,4 @@
 *.bhv2
 *.h5
 *.mat
+/libLSL/
