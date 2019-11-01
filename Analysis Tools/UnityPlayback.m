@@ -66,20 +66,35 @@ uibutton(fig,'Position', [5 50 140 25], 'Text', 'GO', ...
             eyecal_JSON = jsonencode(eyecal_JSON);
             trial_outlet.push_sample({eyecal_JSON});  % push cell array
             
+            % Read XML Header to map Instance IDs back to object names
+            header = ReadXMLHeader(fileHandle(str2double(s)).UserVars.XML_Header);
+            obj_map = header.obj_map;
+            
             % Trial Parameters
             trial_struct = struct();
             trial_struct.command_name = 'TrialParameters';
             trial_struct.trial_parameters.Trial_Number = fileHandle(str2double(s)).UserVars.VR_Trial.Trial_Number;
             trial_struct.trial_parameters.Start_Position = fileHandle(str2double(s)).UserVars.VR_Trial.Start_Position;
-            trial_struct.trial_parameters.cue_Objects = fileHandle(str2double(s)).UserVars.VR_Trial.cue_Objects;
-            trial_struct.trial_parameters.cue_Material = fileHandle(str2double(s)).UserVars.VR_Trial.cue_Material;
-            trial_struct.trial_parameters.target_Objects = fileHandle(str2double(s)).UserVars.VR_Trial.target_Objects;
-            trial_struct.trial_parameters.target_Materials = fileHandle(str2double(s)).UserVars.VR_Trial.target_Materials;
+            
+            trial_struct.trial_parameters.Cue_Objects = ...
+                returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Cue_Objects);
+            trial_struct.trial_parameters.Cue_Material = ...
+                returnNameFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Cue_Material.instanceID);
+            
+            trial_struct.trial_parameters.Target_Objects = ...
+                returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Target_Objects);
+            trial_struct.trial_parameters.Target_Materials = ...
+                returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Target_Materials);
+            
             trial_struct.trial_parameters.Target_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Target_Positions;
-            trial_struct.trial_parameters.distractor_Objects = fileHandle(str2double(s)).UserVars.VR_Trial.distractor_Objects;
+            
+            trial_struct.trial_parameters.Distractor_Objects = ...
+                returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Objects);
             trial_struct.trial_parameters.Distractor_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Positions;
-            trial_struct.trial_parameters.distractor_Materials = fileHandle(str2double(s)).UserVars.VR_Trial.distractor_Materials;
+            trial_struct.trial_parameters.Distractor_Materials = ...
+                returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Materials);
             trial_struct.trial_parameters.n_Frames = size(fileHandle(str2double(s)).UserVars.VR_Data,2);
+            
             %To string;
             trial_string = jsonencode(trial_struct);
             trial_outlet.push_sample({trial_string});
@@ -113,6 +128,22 @@ uibutton(fig,'Position', [5 50 140 25], 'Text', 'GO', ...
             end
             pause(0.1);
         end
+        
+        function name = returnNameFromHeader(ID)
+            names = fieldnames(obj_map);
+            
+            name = names{structfun(@(x) (x==ID), obj_map)};
+        
+        end
+        
+        function name = returnNamesFromHeader(structID)
+            name = {};
+            for i=1:size(structID,1)
+                tmp = returnNameFromHeader(structID(i).instanceID);
+                name = [name; tmp];
+            end
+        end
+        
         
     end
 
