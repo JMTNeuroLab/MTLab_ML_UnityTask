@@ -2,10 +2,10 @@ classdef lslAdapter < mladapter  % CHANGE THE CLASS NAME! The name of this file 
     properties
         % Define user variables here. They will be both readable and writable.
         CurrentOutcome  % Will read the outcome from the trial inlet
-        Outcomes 
-        CorrectOutcomes  % The state value that will trigger an end of trial in ML
-        IncorrectOutcomes % List of possible error outcomes (e.g. Distractor, TimeRunOut,...)
-        Outcome_ID 
+        Outcomes % Cell array of all possible Unity Outcomes
+        Unity_to_ml_map % Array mapping the ML equivalent of Unity outcomes
+        Outcome_ID % index of CurrentOutcome in the Outcomes cell array.
+        
     end
     properties (SetAccess = protected)
         % Define output variables here. They will be only readable to users.
@@ -50,12 +50,14 @@ classdef lslAdapter < mladapter  % CHANGE THE CLASS NAME! The name of this file 
             
             if ~isempty(obj.CurrentOutcome)
                 obj.Outcome_ID = find(ismember(obj.Outcomes, obj.CurrentOutcome), 1, 'first');
-                
-                if any(ismember(obj.Outcome_ID, obj.CorrectOutcomes))
+
+%                 if any(ismember(obj.Outcome_ID, obj.CorrectOutcomes))
+                if obj.Unity_to_ml_map(obj.Outcome_ID) == 0
                     obj.Success = true;
                     continue_ = false;
                     return
-                elseif any(ismember(obj.Outcome_ID, obj.IncorrectOutcomes))
+%                 elseif any(ismember(obj.Outcome_ID, obj.IncorrectOutcomes))
+                else
                     obj.Success = false;
                     continue_ = false;
                     return

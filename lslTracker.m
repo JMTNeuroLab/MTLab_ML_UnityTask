@@ -26,10 +26,10 @@ classdef lslTracker < mltracker
         %   7: Player State (Collider ID)        
         %   8: Gaze Position X
         %   9: Gaze Position Y
-        %                                     _
-        %   10-14: Gaze Targets ID             |
-        %   15-19: Gaze Targets Number of rays | 5x
-        %                                     _|
+        %                                     
+        %   10-14: Gaze Targets ID             
+        %   15-19: Gaze Targets Number of rays 
+        %                                     
         %   20: Trial State
         %   21: PhotoDiodeIntensity
         %   22: Unity LSL Time
@@ -141,7 +141,7 @@ classdef lslTracker < mltracker
         
         function [frame_data, trial_data, xml_data] = GetTrialData(obj, p)
             % get remaining frame samples in lsl stream
-            obj.acquire(p)
+%             obj.acquire(p)
             
             % remove nan columns
             frame_data = obj.Frame_Data(:, sum(isnan(obj.Frame_Data),1)==0);
