@@ -1,5 +1,5 @@
 hotkey('x', 'escape_screen(); assignin(''caller'',''continue_'',false);');
-bhv_code(10,'Start',20,'Sample',30,'Delay',40,'Go',50,'Reward');  % behavioral codes
+bhv_code(10,'Start',50,'Reward');  % behavioral codes
  
 % get pointer to inlets defined in alert_function.m
 % frame tracker: to get frame data 
@@ -30,55 +30,74 @@ ML_Tracker.add(Unity_);
 %     'aborted'          9
 % These values are from the trialholder_v2.m script and they seem to be
 % hard-coded in there so I don't think we can add more. We will hovever
-% match unused outcomes such as 'lever break' to something else in 
-% Unity like: 'Distractor'. 
+% match multiple custom outcomes to these ones.
 % BE CAREFUL: although "correct" is = 0, Matlab uses 1 based indexing so: 
 % correct outcome = unity_to_ml_outcomes(1) but
 % the trial error call is : trialerror(0); 
-% TODO: COMPLETE. 
-unity_to_ml_outcomes = {'correct', ...          0
-                        'no_response', ...      1
-                        'distractor', ...       2
-                        'break_fixation',...    3
-                        'no_fixation',...       4
-                        'incorrect', ...        6
-                        'early_response',...    7
-                        'ignored', ...          8
-                        'aborted'}; %           9
 
-%The outcomes from unity will be slightly different: no spaces, 
-correct_outcomes = [1];
-incorrect_outcomes = [2:9];
+% This is the list of possible Unity outcomes, we will match them to the
+% default monkeylogic ones. It is possible to add new ones, as long as the
+% unity_to_ml_code is updated properly. 
+%                Unity Outcome           ML Code
+unity_outcomes = {'correct', ...          0
+                  'correct_mid', ...      0
+                  'no_response', ...      1
+                  'late_response', ...    2
+                  'break_fixation',...    3
+                  'no_fixation',...       4
+                  'early_response',...    5
+                  'incorrect', ...        6
+                  'incorrect_mid',...     6
+                  'lever_break', ...      7
+                  'ignored', ...          8
+                  'aborted'}; %           9
+
+% Correct == 0; the rest is Incorrect 
+unity_to_ml_code = [0, 0, 1, 2, 3, 4, 5, 6, 6, 7, 8, 9];              
 
 unity = lslAdapter(Unity_);  % create Adapter from Tracker
 % Specify which states trigger a (in)correct end of trial
-unity.Outcomes = unity_to_ml_outcomes;
-unity.CorrectOutcomes = correct_outcomes;  
-unity.IncorrectOutcomes = incorrect_outcomes;  
+unity.Outcomes = unity_outcomes;
+unity.Unity_to_ml_map = unity_to_ml_code;
 
 scene1 = create_scene(unity); 
 
 run_scene(scene1,10);
 
-if ~unity.Success          % The failure of MultiTarget means that none of the targets was chosen.
-    idle(0);              % Clear the screen.
+% NOT success means that it is an Incorrect Outcome
+if ~unity.Success          
+    % Clear the screen.
+    idle(0);              
 
     if (isempty(unity.Outcome_ID))
         trialerror(9);
     else
-        trialerror(unity.Outcome_ID - 1);
+        trialerror(unity_to_ml_code(unity.Outcome_ID));
     end
-    
+
+% correct
 else
-    trialerror(0); % correct
-    goodmonkey(100, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50); % 100 ms of juice x 2
+    trialerror(0); 
+end
+
+% Give reward for both correct and incorrect-mid trials
+% TODO: figure out ML GUI reward setting. 
+switch unity.CurrentOutcome
+    case {"correct"}
+        goodmonkey(100, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50);
+    case {"correct_mid", "incorrect_mid"}
+        goodmonkey(50, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50); 
 end
 
 % Get trial data and save 
-
 [data, trial, xml] = Unity_.GetTrialData(param_);
 bhv_variable('VR_Data', data)  % To Save variables to file. 
 bhv_variable('VR_Trial', trial)
+
+% The XML header from the LSL streams contains the convertion values
+% between State System phase name and number, and between objects' instance
+% IDs and their name. It is redundant to save for every trial but there
+% isn't an easy way to save a single struct for each file. 
 bhv_variable('XML_Header', xml)
 
 % Since MonkeyLogic only saves the calibrated eye data in degrees, we need
