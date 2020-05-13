@@ -85,12 +85,18 @@ uibutton(fig,'Position', [5 50 140 25], 'Text', 'GO', ...
                 returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Target_Objects);
             trial_struct.trial_parameters.Target_Materials = ...
                 returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Target_Materials);
-            
-            trial_struct.trial_parameters.Target_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Target_Positions;
-            
+            if size(fileHandle(str2double(s)).UserVars.VR_Trial.Target_Positions,1) == 1
+                trial_struct.trial_parameters.Target_Positions = {fileHandle(str2double(s)).UserVars.VR_Trial.Target_Positions};
+            else
+                trial_struct.trial_parameters.Target_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Target_Positions;
+            end
             trial_struct.trial_parameters.Distractor_Objects = ...
                 returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Objects);
-            trial_struct.trial_parameters.Distractor_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Positions;
+            if size(fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Positions,1) == 1
+                trial_struct.trial_parameters.Distractor_Positions = {fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Positions};
+            else
+                trial_struct.trial_parameters.Distractor_Positions = fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Positions;
+            end
             trial_struct.trial_parameters.Distractor_Materials = ...
                 returnNamesFromHeader(fileHandle(str2double(s)).UserVars.VR_Trial.Distractor_Materials);
             trial_struct.trial_parameters.n_Frames = size(fileHandle(str2double(s)).UserVars.VR_Data,2);

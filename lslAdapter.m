@@ -1,7 +1,8 @@
 classdef lslAdapter < mladapter  % CHANGE THE CLASS NAME! The name of this file must be identical with it.
     properties
         % Define user variables here. They will be both readable and writable.
-        CurrentOutcome  % Will read the outcome from the trial inlet
+        % Will read the outcome from the trial inlet, (9 = aborted)
+        CurrentOutcome  
         Outcomes % Cell array of all possible Unity Outcomes
         Unity_to_ml_map % Array mapping the ML equivalent of Unity outcomes
         Outcome_ID % index of CurrentOutcome in the Outcomes cell array.
