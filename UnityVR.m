@@ -70,11 +70,10 @@ if ~unity.Success
     idle(0);              
 
     if (isempty(unity.Outcome_ID))
-        trialerror(9);
-    else
-        trialerror(unity_to_ml_code(unity.Outcome_ID));
+        unity.Outcome_ID = 12;
     end
-
+    
+    trialerror(unity_to_ml_code(unity.Outcome_ID));
 % correct
 else
     trialerror(0); 
@@ -82,10 +81,14 @@ end
 
 % Give reward for both correct and incorrect-mid trials
 % TODO: figure out ML GUI reward setting. 
-switch unity.CurrentOutcome
-    case {"correct"}
+if isempty(unity.CurrentOutcome)
+    unity.CurrentOutcome = 'aborted';
+end
+
+switch unity.Outcome_ID
+    case {1} % 'correct'
         goodmonkey(100, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50);
-    case {"correct_mid", "incorrect_mid"}
+    case {2, 9} % 'correct_mid', 'incorrect_mid'
         goodmonkey(50, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50); 
 end
 

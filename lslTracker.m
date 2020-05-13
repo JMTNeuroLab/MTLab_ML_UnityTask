@@ -135,7 +135,7 @@ classdef lslTracker < mltracker
             if isfield(obj.Trial_Data, 'Outcome')
                 sample = obj.Trial_Data.Outcome;
             else
-                sample = [];
+                sample = [];  % defaults to aborted when no data. 
             end
         end
         
