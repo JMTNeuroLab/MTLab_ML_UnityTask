@@ -48,6 +48,16 @@ switch hook
             TrialRecord.User.trial_inlet = [];
         end
         
+        stream = {};
+        while isempty(stream) && toc(timeout) < 10
+            stream = lsl_resolve_byprop(TrialRecord.User.lsl_lib,'name','Tobii_GazeData', 1, 0.5);
+        end
+        if ~isempty(stream)
+            TrialRecord.User.tobii_inlet = lsl_inlet(stream{1});
+        else
+            TrialRecord.User.tobii_inlet = [];
+        end
+        
         pause(0.1)
         %tell Unity to start experiment. 
         eyecal_JSON = struct();

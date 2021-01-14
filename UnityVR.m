@@ -3,8 +3,16 @@ bhv_code(10,'Start',50,'Reward');  % behavioral codes
  
 % get pointer to inlets defined in alert_function.m
 % frame tracker: to get frame data 
-Unity_ = lslTracker(TrialRecord.User.frame_inlet, TrialRecord.User.trial_inlet, MLConfig);
+Unity_ = lslTracker(TrialRecord.User.frame_inlet, ...
+                    TrialRecord.User.trial_inlet, ...
+                    MLConfig);
 Unity_.Lib = TrialRecord.User.lsl_lib;
+
+% Tobii tracker is here even if the EyeLink is used. It just wont collect
+% any data. 
+Tobii_ = tobiiTracker(TrialRecord.User.tobii_inlet, ...
+                      MLConfig);
+Tobii_.Lib = TrialRecord.User.lsl_lib;
 
 % Can do this here since the runtime script is
 % executed on every trial. This makes sure that
@@ -12,6 +20,7 @@ Unity_.Lib = TrialRecord.User.lsl_lib;
 % ML_Tracker is a MonkeyLogic object containing all trackers (eye,
 % joystick,...) and is defined in trialholder_v2.m line 54.
 ML_Tracker.add(Unity_);  
+ML_Tracker.add(Tobii_);
 
 % scene: unity.
 % We will only have one scene that will collect data and
@@ -102,6 +111,8 @@ bhv_variable('VR_Trial', trial)
 % IDs and their name. It is redundant to save for every trial but there
 % isn't an easy way to save a single struct for each file. 
 bhv_variable('XML_Header', xml)
+
+bhv_variable('Tobii_Gaze', Tobii_.GetTrialData(param_));
 
 % Since MonkeyLogic only saves the calibrated eye data in degrees, we need
 % to keep the calibration and pixels per degree values for analysis and 

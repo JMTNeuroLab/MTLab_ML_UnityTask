@@ -6,7 +6,7 @@ lib = lsl_loadlib();
 disp('Resolving an EEG stream...');
 result = {};
 while isempty(result)
-    result = lsl_resolve_byprop(lib,'type','EEG'); end
+    result = lsl_resolve_byprop(lib,'type','TobiiGazeData'); end
 
 % create a new inlet
 disp('Opening an inlet...');
