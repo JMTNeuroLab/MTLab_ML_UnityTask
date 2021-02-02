@@ -12,6 +12,9 @@ classdef lslTracker < mltracker
         Frame_Inlet  % LSL inlet for Unity Frame data
         Trial_Inlet
         Lib  % lsl_lib
+        % for tasks with multiple targets we'll send a reward when one is
+        % hit. We need to store the default value here. 
+        RewardDuration  
     end
     properties (SetAccess = protected)
         Counter = 1  % position within the pre-allocated memory arrays
@@ -65,7 +68,7 @@ classdef lslTracker < mltracker
                     obj.Trial_Data = obj.ProcessTrial(sample{1}, timestamp, p.trialtime());
                 end
             end
-            
+            reward = 0;
             % Frame Data acquisition for tracker execution
             if ~isempty(obj.Frame_Inlet)
                 % ~ .036 ms to acquire. 
@@ -74,7 +77,7 @@ classdef lslTracker < mltracker
                 %   Local clock + time correction = remote clock;
                 [sample, timestamp] = obj.Frame_Inlet.pull_sample(0);
                 if ~isempty(sample)
-                    temp_array = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime());
+                    [temp_array, reward] = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime(), reward);
                     obj.Frame_Data(:, obj.Counter) = temp_array;
                     obj.Counter = obj.Counter + 1;
 
@@ -86,10 +89,17 @@ classdef lslTracker < mltracker
                             has_buffer = false;
                             continue
                         end
-                        temp_array = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime());
+                        [temp_array, reward] = obj.ProcessSample(sample, timestamp, lsl_local_clock(obj.Lib), p.trialtime(), reward);
                         obj.Frame_Data(:, obj.Counter) = temp_array;
                     obj.Counter = obj.Counter + 1;
                     end
+                    
+                    % Check if the latest player state is an intermediate
+                    % reward. 
+                    if (reward >0)
+                        obj.DAQ.goodmonkey(obj.RewardDuration * reward);
+                    end
+                    
                     obj.Success = true;
                 else
                     obj.Success = false;
@@ -97,13 +107,29 @@ classdef lslTracker < mltracker
             end
         end
         
-        function temp_array = ProcessSample(obj, sample, timestamp, lsl_clock, trialtime)
+        function [temp_array, reward] = ProcessSample(obj, sample, timestamp, lsl_clock, trialtime, reward)
             Time_Corr = obj.Frame_Inlet.time_correction();
             temp_array = [sample'; % is a (1,22) then -> (22,1)
                 Time_Corr;
                 timestamp;
                 lsl_clock;
                 trialtime];
+            
+            switch sample(20)  % trial state
+                case 15  % quarter
+                   reward_add = 0.25; 
+                case 16  % half
+                    reward_add = 0.5;
+                case 17  % 3/4
+                    reward_add = 0.75;
+                case 18  % full
+                    reward_add = 1;
+                case 19 % none
+                    reward_add = 0;
+                otherwise
+                    reward_add = 0;
+            end
+            reward = reward + reward_add;
         end
         
         function temp_struct = ProcessTrial(obj, sample, timestamp, trialtime)

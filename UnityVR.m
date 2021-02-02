@@ -8,6 +8,10 @@ Unity_ = lslTracker(TrialRecord.User.frame_inlet, ...
                     MLConfig);
 Unity_.Lib = TrialRecord.User.lsl_lib;
 
+% we need the reward duration here because we can have intermediate rewards
+% in multiple rewards tasks. 
+Unity_.RewardDuration = MLConfig.RewardFuncArgs.Duration;
+
 % Tobii tracker is here even if the EyeLink is used. It just wont collect
 % any data. 
 Tobii_ = tobiiTracker(TrialRecord.User.tobii_inlet, ...
@@ -96,9 +100,9 @@ end
 
 switch unity.Outcome_ID
     case {1} % 'correct'
-        goodmonkey(100, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50);
+        goodmonkey(MLConfig.RewardFuncArgs.Duration, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50);
     case {2, 9} % 'correct_mid', 'incorrect_mid'
-        goodmonkey(50, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50); 
+        goodmonkey(0.5*MLConfig.RewardFuncArgs.Duration, 'juiceline',1, 'numreward',1, 'pausetime',0, 'eventmarker',50); 
 end
 
 % Get trial data and save 
