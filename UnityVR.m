@@ -80,7 +80,7 @@ run_scene(scene1,10);
 % NOT success means that it is an Incorrect Outcome
 if ~unity.Success          
     % Clear the screen.
-    idle(0);              
+    % idle(0);              
 
     if (isempty(unity.Outcome_ID))
         unity.Outcome_ID = 12;
